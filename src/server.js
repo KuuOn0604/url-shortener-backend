@@ -1,11 +1,21 @@
 const express = require("express");
 const mongoose = require("mongoose");
-
+const PORT = process.env.PORT || 3000;
 const app = express();
+const cors = require("cors");
+
+
+require('dotenv').config();
+
 app.use(express.json());
+app.use(cors());
 
 // TODO: replace with your own MongoDB connection string
-mongoose.connect("mongodb://127.0.0.1:27017/url_shortener");
+const mongoURI = process.env.MONGODB_URI;
+
+mongoose.connect(mongoURI)
+  .then(() => console.log("Connected"))
+  .catch(err => console.error("Error: ", err));
 
 const urlSchema = new mongoose.Schema({
   originalUrl: String,
@@ -47,6 +57,7 @@ app.get("/:shortCode", async (req, res) => {
   res.redirect(url.originalUrl);
 });
 
-app.listen(3000, () => {
-  console.log("Server running on http://localhost:3000");
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Server running on ${PORT}`);
 });
+
