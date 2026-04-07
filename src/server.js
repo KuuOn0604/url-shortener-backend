@@ -26,12 +26,30 @@ const urlSchema = new mongoose.Schema({
 const Url = mongoose.model("Url", urlSchema);
 
 app.post("/api/urls", async (req, res) => {
-  const newUrl = await Url.create({
-    originalUrl: req.body.originalUrl,
-    shortCode: req.body.shortCode,
-  });
+  try {
+    const { originalUrl } = req.body;
 
-  res.json(newUrl);
+    const existedUrl = await Url.findOne({ originalUrl });
+
+    if (existedUrl) {
+      console.log("Found url in database.");
+      return res.json(existedUrl);
+    }
+
+    const shortCode = Math.random().toString(36).substring(1, 8);
+
+    const newUrl = await Url.create({
+      originalUrl: originalUrl,
+      shortCode: shortCode,
+    });
+
+    console.log("Success.");
+    res.status(201).json(newUrl);
+
+  } catch (error) {
+    console.error("Error: ", error);
+    res.status(500).json({ error: "Bye" });
+  }
 });
 
 app.get("/api/urls", async (req, res) => {
